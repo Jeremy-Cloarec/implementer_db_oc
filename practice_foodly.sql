@@ -1,11 +1,19 @@
 SHOW DATABASES;
+
 USE foodly;
+
 SELECT * FROM aliment;
+
 SELECT * FROM utilisateur;
+
 SELECT * FROM langue;
+
 SELECT * FROM utilisateur_aliment;
+
 SELECT nom FROM utilisateur;
+
 SHOW COLUMNS FROM aliment;
+
 SHOW TABLES;
 
 -- SHOW COLUMNS FROM utilisateur;
@@ -127,12 +135,14 @@ WHERE (
         utilisateur.email LIKE "%gmail%"
     )
     AND (langue.id = 1)
-    ORDER BY utilisateur.id DESC;
+ORDER BY utilisateur.id DESC;
 
 -- Nom de famille de tous les utilisateurs ayant sélectionné le français
-SELECT UPPER(utilisateur.nom) as "NOM", langue.nom AS "LANGUE"  FROM utilisateur
-JOIN langue ON utilisateur.langue_id = langue.id
-WHERE langue.id = 1;
+SELECT UPPER(utilisateur.nom) as "NOM", langue.nom AS "LANGUE"
+FROM utilisateur
+    JOIN langue ON utilisateur.langue_id = langue.id
+WHERE
+    langue.id = 1;
 
 /** Relations de plusieurs à plusieurs
 Stocker tous les aliments qui ont été scanné par un utilisateur
@@ -142,18 +152,29 @@ Stocker tous les aliments qui ont été scanné par un utilisateur
 Relation many to many. Mais SQL ne sait que stocker une valeur par champs. 
 Table utilisateur_aliment = sert à stocker des relations entre un utilisateur et un aliment
 Convention : {table1}_{table2}
- */
+*/
 
 -- Commande pour relier tous les utilisateurs aux aliments qu'ils ont scannés
 SELECT *
-FROM utilisateur
-JOIN utilisateur_aliment ON (utilisateur.id = utilisateur_aliment.utilisateur_id )
-JOIN aliment ON (aliment.id = utilisateur_aliment.aliment_id); 
+FROM
+    utilisateur
+    JOIN utilisateur_aliment ON (
+        utilisateur.id = utilisateur_aliment.utilisateur_id
+    )
+    JOIN aliment ON (
+        aliment.id = utilisateur_aliment.aliment_id
+    );
 
 -- Voir tous les aliments sélectionnés par les utilisateurs dont adress email est une adress gmail
 
 SELECT *
-FROM utilisateur
-JOIN utilisateur_aliment ON (utilisateur.id = utilisateur_aliment.utilisateur_id)
-JOIN aliment ON (aliment.id = utilisateur_aliment.aliment_id)
-WHERE utilisateur.email LIKE "%gmail%";
+FROM
+    utilisateur
+    JOIN utilisateur_aliment ON (
+        utilisateur.id = utilisateur_aliment.utilisateur_id
+    )
+    JOIN aliment ON (
+        aliment.id = utilisateur_aliment.aliment_id
+    )
+WHERE
+    utilisateur.email LIKE "%gmail%";
