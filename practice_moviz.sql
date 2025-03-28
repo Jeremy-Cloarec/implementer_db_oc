@@ -26,3 +26,8 @@ WHERE note.id < 4;
 SELECT * FROM film
 JOIN film_pays_de_sortie ON film.id = film_pays_de_sortie.film_id
 JOIN pays_de_sortie ON pays_de_sortie.id = film_pays_de_sortie.pays_de_sortie_id;
+
+
+------------------------------
+------------------------------
+SHOW COLUMNS FROM film;
