@@ -178,3 +178,128 @@ FROM
     )
 WHERE
     utilisateur.email LIKE "%gmail%";
+
+-- ALTER
+-- ADD ajouter une colonne
+ALTER TABLE aliment ADD vitamines_c FLOAT;
+
+ALTER TABLE langue ADD iso_langue VARCHAR(100);
+
+UPDATE langue SET iso_langue = "fr-FR" WHERE id = 1;
+
+UPDATE langue SET iso_langue = "en-US" WHERE id = 2;
+
+--DROP
+-- Supprimer une colonne
+ALTER TABLE aliment DROP bio;
+
+ALTER TABLE utilisateur DROP nom;
+
+--MODIFY modifier un champ existant
+ALTER TABLE aliment MODIFY calories FLOAT;
+
+ALTER TABLE utilisateur MODIFY email VARCHAR(500);
+
+--CHANGE renommer un champ
+-- Pour renommer une colonne il faut aussi indiquer son type
+ALTER TABLE aliment CHANGE sucre sucres FLOAT;
+
+ALTER TABLE langue CHANGE iso_langue code_pays VARCHAR(100);
+
+-- Ajouter une relation un à plusieurs
+CREATE TABLE famille (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL
+);
+
+TRUNCATE famille;
+
+INSERT INTO
+    famille (nom)
+VALUES ('légumes'),
+    ('fruits'),
+    ('viande'),
+    ('poisson'),
+    ('féuclent'),
+    ('produits laitier');
+
+SHOW COLUMNS FROM famille;
+
+SELECT * FROM famille;
+
+-- Dans le cadre d'une relation de 1 à plusieurs c'est l'objet qui se trouve du côté plusieurs de la relation qui va être modifié
+
+-- 1/ Ajout du champ famille_id sur les aliments
+ALTER TABLE aliment ADD famille_id INT NULL;
+
+-- 2/ Modification de ce champ pour signaler à MySQL que c'est une référence à la table famille
+ALTER TABLE aliment
+ADD FOREIGN KEY (famille_id) REFERENCES famille (id) ON DELETE CASCADE;
+
+-- ON DELETE
+-- RESTRICT ou NO ACTION : MySQL va empêcher la suppression tant que "légume" est référencé sur sur au moins un objet aliment
+
+-- SET NULL : MySQL va autoriser  la suppression de "légumes"  et remplacer "famille_id" par valuer NULL
+
+-- CASCADE : MySQL va supprimer "poire" et "pomme" en même tant que "légume"
+
+-- 3/ Modification d'un objet pour y stocker une relation
+UPDATE aliment SET famille_id = 1 WHERE nom = "haricots verts";
+
+UPDATE aliment
+SET
+    famille_id = 2
+WHERE
+    nom = "pomme"
+    OR nom = "poire"
+    OR nom = "banane"
+
+UPDATE aliment
+SET
+    famille_id = 3
+WHERE
+    nom = "jambon"
+    OR nom = "steak haché"
+    OR nom = "blanc de dinde"
+    OR nom = "filet de poulet"
+    OR nom = "oeuf"
+
+UPDATE aliment SET famille_id = 4 WHERE nom = "saumon"
+
+UPDATE aliment
+SET
+    famille_id = 5
+WHERE
+    nom = "riz"
+    OR nom = "pâtes completes"
+    OR nom = "baguette";
+
+UPDATE aliment SET famille_id = 6 WHERE nom = "lait d'amande"
+
+SELECT aliment.nom, famille.nom
+FROM aliment
+    JOIN famille ON aliment.famille_id = famille.id
+
+-- Ajouter les réductions disponibles sur les aliments. Une réduction peut être la même pour plusieurs aliments mais chaque aliment peut n'avoir q'une seule réduction.
+-- Champ Valeur qui contient réduction au format texte
+CREATE TABLE reduction (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    valeur VARCHAR(100)
+)
+
+TRUNCATE reduction;
+INSERT INTO reduction (valeur) VALUES ('30'), ('20'),('15');
+ALTER TABLE aliment ADD reduction_id INT NULL;
+ALTER TABLE aliment ADD FOREIGN KEY(reduction_id) REFERENCES reduction (id) ON DELETE CASCADE;
+
+UPDATE aliment SET reduction_id = 1 WHERE nom = "muesli"
+OR nom = "oeuf"
+OR nom= "baguette";
+UPDATE aliment SET reduction_id = 2 WHERE nom = "banane"
+OR nom = "jambon"
+OR nom= "saumon";
+
+SELECT aliment.nom, reduction.valeur FROM aliment
+JOIN reduction ON aliment.reduction_id = reduction.id;
+
+SELECT * FROM aliment;
