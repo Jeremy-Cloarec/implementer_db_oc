@@ -288,18 +288,93 @@ CREATE TABLE reduction (
 )
 
 TRUNCATE reduction;
-INSERT INTO reduction (valeur) VALUES ('30'), ('20'),('15');
+
+INSERT INTO reduction (valeur) VALUES ('30'), ('20'), ('15');
+
 ALTER TABLE aliment ADD reduction_id INT NULL;
-ALTER TABLE aliment ADD FOREIGN KEY(reduction_id) REFERENCES reduction (id) ON DELETE CASCADE;
 
-UPDATE aliment SET reduction_id = 1 WHERE nom = "muesli"
-OR nom = "oeuf"
-OR nom= "baguette";
-UPDATE aliment SET reduction_id = 2 WHERE nom = "banane"
-OR nom = "jambon"
-OR nom= "saumon";
+ALTER TABLE aliment
+ADD FOREIGN KEY (reduction_id) REFERENCES reduction (id) ON DELETE CASCADE;
 
-SELECT aliment.nom, reduction.valeur FROM aliment
-JOIN reduction ON aliment.reduction_id = reduction.id;
+UPDATE aliment
+SET
+    reduction_id = 1
+WHERE
+    nom = "muesli"
+    OR nom = "oeuf"
+    OR nom = "baguette";
 
-SELECT * FROM aliment;
+UPDATE aliment
+SET
+    reduction_id = 2
+WHERE
+    nom = "banane"
+    OR nom = "jambon"
+    OR nom = "saumon";
+
+SELECT aliment.nom, reduction.valeur
+FROM aliment
+    JOIN reduction ON aliment.reduction_id = reduction.id;
+
+-- Ajouter une relation plusieurs à plusieurs
+-- Lieux de ventes: un lieu peut vendre plusieurs aliments, les aliments peuvent être vedu dans plusieurs lieux
+-- 1/ Créer une table lieu
+CREATE TABLE lieu (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    type VARCHAR(100) NOT NULL
+);
+
+-- 2/ Remplir la table
+INSERT INTO
+    lieu (nom, type)
+VALUES (
+        'Carrefour City',
+        "Supermarché"
+    );
+
+-- 3/ Créer table liaison
+CREATE TABLE aliment_lieu (
+    aliment_id INT NOT NULL,
+    lieu_id INT NOT NULL,
+    FOREIGN KEY (aliment_id) REFERENCES aliment (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (lieu_id) REFERENCES lieu (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (aliment_id, lieu_id)
+);
+
+-- 4/ Remplir la table liaison
+INSERT INTO aliment_lieu (aliment_id, lieu_id) VALUES ('11', '1');
+
+INSERT INTO aliment_lieu (aliment_id, lieu_id) VALUES ('12', '1');
+-- 5/ Tester des requêtes
+SELECT *
+FROM
+    aliment
+    JOIN aliment_lieu ON aliment.id = aliment_lieu.aliment_id
+    JOIN lieu ON lieu.id = aliment_lieu.lieu_id;
+
+-- Un utilisateur peut utiliser Foodly sur plusieurs appareils et un même appareil peut-être commun à plusieurs utilisateurs
+CREATE TABLE device (
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(100) NOT NULL
+);
+
+INSERT INTO
+    device (type)
+VALUES ("Desktop"),
+    ("Mobile"),
+    ("Tablette");
+
+CREATE TABLE utilisateur_device (
+    utilisateur_id INT NOT NULL,
+    device_id INT NOT NULL,
+    FOREIGN KEY (utilisateur_id) REFERENCES utilisateur (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (device_id) REFERENCES device (id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    PRIMARY KEY (utilisateur_id, device_id)
+);
+
+INSERT utilisateur_device (utilisateur_id, device_id) VALUE ('1','2'), ('1', '1'), ('2', '3');
+
+SELECT * FROM utilisateur 
+JOIN utilisateur_device ON utilisateur.id = utilisateur_device.utilisateur_id
+JOIN device ON device.id = utilisateur_device.device_id;
